@@ -1,0 +1,6 @@
+Sitemap: https://probably-using-console.log/sitemap.xml
+User-agent: *
+Allow: /
+
+# Disallow example (uncomment if needed)
+# Disallow: /admin

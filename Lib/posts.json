@@ -1,0 +1,37 @@
+[
+  {
+    "title": "Ridely: Building the Future of Smart Deliveries in Africa",
+    "slug": "ridely-building-the-future-of-smart-deliveries-in-africa",
+    "excerpt": "Ridely is a smart dispatch and delivery platform designed to simplify logistics in Africa through real-time tracking, pricing transparency, and secure deliveries.",
+    "author": "Trust Williams",
+    "date": "2025-12-01T10:00:00.000Z",
+    "readTime": 6,
+    "tags": ["Ridely","Startup","Logistics","TechInAfrica","WebApp","MobileApp","Innovation"],
+    "content": "# Ridely\n\nRidely is a smart delivery and dispatch platform designed to simplify how packages are sent and received. Built to reduce risk, increase transparency, and provide real-time tracking, Ridely solves key logistics challenges in African cities.\n\n## Problem Statement\n- Unreliable delivery systems\n- No transparency on rider location\n- Poor user experience\n- High risk of loss\n- Manual coordination\n\n## Solution\nRidely enables users to:\n- Request a rider\n- Enter pickup + delivery address\n- See live rider tracking\n- Get real-time cost estimation based on distance and parcel size\n- Fully track delivery progress\n\n## Key Features\n- Real-time GPS tracking\n- Distance-based pricing\n- Parcel size selection\n- Secure rider system\n- In-app communication\n- Delivery history\n- Ratings and trust system\n\n## Tech Stack / Implementation Idea\n- React Native for user & rider apps\n- Next.js for website\n- Node.js backend\n- Map integration\n- Cloud database\n- WebSockets for live tracking\n\n## Use case\n\"I need to send a package urgently and want to track it in real time.\"\n\n## Future Vision\nRidely evolving into:\n- Package + food + document delivery\n- Cross-city logistics\n- Business dashboards\n- Integration with e-commerce\n\n## CTA\nJoin Ridely's journey into the future of African deliveries.",
+    "comments": [],
+    "likes": 12
+  },
+  {
+    "title": "CryptoSplit: Splitting Bills in the Web3 Era Using Smart Contracts",
+    "slug": "cryptosplit-splitting-bills-in-the-web3-era",
+    "excerpt": "CryptoSplit is a decentralized way to split bills and manage group payments using secure smart contracts.",
+    "author": "Trust Williams",
+    "date": "2025-11-15T09:00:00.000Z",
+    "readTime": 5,
+    "tags": ["CryptoSplit","Web3","Blockchain","DeFi","SmartContracts"],
+    "content": "# CryptoSplit\n\nCryptoSplit is a concept designed to solve one of Web3’s everyday problems: splitting expenses safely and transparently using smart contracts.\n\n## What is CryptoSplit?\nCryptoSplit allows:\n- Group expenses to be created\n- Wallets to connect\n- Smart contracts to enforce split\n- Participants to pay their portion\n- Automated release when fully funded\n\n## Why it matters\nTraditional apps require trust. CryptoSplit uses:\n- Code-based trust\n- Transparent ledger\n- Automated execution\n- No middleman\n\n## Features\n- Wallet connect\n- Smart contract creation\n- Auto split calculation\n- Payment deadlines\n- Refund trigger if unpaid\n- DAO group mode\n\n## Example\n\"A group of friends splits a hotel bill using CryptoSplit in minutes.\"\n\n## Business & Startup Potential\n- Web3 families & teams\n- Freelancer billing\n- Community funding\n- Event cost sharing\n\n## Future Vision\nCryptoSplit could become:\n- A Web3 payment layer\n- A global micro-transaction network\n- A DAO expense manager\n\n## CTA\nCryptoSplit isn’t just an app — it’s the future of shared value.",
+    "comments": [],
+    "likes": 8
+  },
+  {
+    "title": "TOON vs JSON: Why Token Oriented Object Notation is the Future of Data",
+    "slug": "toon-vs-json-token-oriented-object-notation",
+    "excerpt": "A deep technical breakdown of why Token Oriented Object Notation (TOON) is more powerful, secure, and efficient than JSON in token-based systems.",
+    "author": "Trust Williams",
+    "date": "2025-10-05T08:00:00.000Z",
+    "readTime": 7,
+    "tags": ["TOON","JSON","DataFormats","Web3","DeveloperTools"],
+    "content": "# TOON vs JSON\\n\\nTOON (Token Oriented Object Notation) is a data format designed specifically for token-based ecosystems, making it ideal for Web3, smart contracts, and decentralized systems.\\n\\n## Difference from JSON\\nJSON is:\\n- Text-based\\n- General purpose\\n- No built-in token logic\\n- Requires heavy parsing\\n\\nTOON is:\\n- Token-first\\n- Lightweight\\n- Structured for decentralized validation\\n- Optimized for blockchain storage\\n- Faster in token-based systems\\n\\n## Sample JSON\\n```\\n{\\n  \\\"user\\\": {\\n    \\\"id\\\": \\\"123\\\",\\n    \\\"name\\\": \\\"Alice\\\",\\n    \\\"balance\\\": 1000\\n  }\\n}\\n```,\\n\\n## Sample TOON\\n```\\ntoken user {\\n  id: 123;\\n  name: Alice;\\n  balance: 1000;\\n}\\n```,\\n\\n## Advantages of TOON\\n- Built-in token semantics\\n- Reduced parsing overhead\\n- Enhanced security for token data\\n- Better suited for smart contracts\\n- More efficient storage on-chain\\n\\n## Use Cases\\n- Decentralized applications (dApps)\\n- Smart contract data exchange\\n- Token management systems\\n- Blockchain-based identity solutions\\n\\n## Future Vision\\nTOON could become the standard for data exchange in tokenized ecosystems, driving efficiency and security in Web3 applications.\\n\\n## CTA\\nDevelopers and organizations should consider adopting TOON for their token-based projects to leverage its unique advantages over JSON.",
+    "comments": []
+  }
+]
