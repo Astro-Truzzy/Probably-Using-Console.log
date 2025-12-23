@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-const DATA = path.join(process.cwd(), 'lib', 'posts.json')
+const DATA = path.join(process.cwd(), 'Lib', 'posts.json')
 
 export async function getAllPosts(){
   const raw = fs.readFileSync(DATA, 'utf-8')
