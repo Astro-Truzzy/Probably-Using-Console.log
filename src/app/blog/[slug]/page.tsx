@@ -1,13 +1,18 @@
 import { getPostBySlug, getAllPosts } from "../../../../Lib/posts";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import Link from "next/link";
+import "highlight.js/styles/github-dark.min.css";
+import { articleJsonLd, articleMetadata } from "@lib/seo";
+import { siteUrl } from "@lib/config";
+import JsonLd from "../../Components/JsonLd";
 import LikeButton from "../../Components/LikeButton";
 import Comments from "../../Components/Comments";
 import NewsletterForm from "../../Components/NewsletterForm";
 import ShareButtons from "../../Components/ShareButtons";
+import ConsoleBreadcrumb from "../../Components/terminal/ConsoleBreadcrumb";
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -17,66 +22,34 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
-  if (!post) return { title: "Post not found" };
-  const SITE_URL = "https://probably-using-console.log";
-  const url = `${SITE_URL}/blog/${post.slug}`;
-  return {
-    title: post.title,
-    description:
-      post.excerpt || post.description || post.content?.slice(0, 160),
-    openGraph: {
-      title: post.title,
-      description: post.excerpt || post.description,
-      url,
-      type: "article",
-      images: post.cover
-        ? [{ url: post.cover }]
-        : [{ url: `${SITE_URL}/og-image.png` }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.excerpt || post.description,
-      images: post.cover ? [post.cover] : [`${SITE_URL}/og-image.png`],
-    },
-    metadataBase: new URL(SITE_URL),
-  };
+  if (!post) return { title: "Post not found", robots: { index: false, follow: false } };
+  return articleMetadata(post);
 }
 
 export default async function PostPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
-  if (!post) return <div>Not found</div>;
-
-  const SITE_URL = "https://probably-using-console.log";
-  const canonical = `${SITE_URL}/blog/${post.slug}`;
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: post.title,
-    description: post.excerpt || post.content?.slice(0, 160),
-    author: { "@type": "Person", name: post.author || "Trust Williams" },
-    datePublished: post.date,
-    mainEntityOfPage: canonical,
-    publisher: {
-      "@type": "Organization",
-      name: "Probably Using Console.log()",
-    },
-  };
+  if (!post) notFound();
 
   return (
     <article>
+      <JsonLd data={articleJsonLd(post)} />
+      <ConsoleBreadcrumb segments={["blog", post.slug]} />
       <h1 className="text-3xl font-mono">{post.title}</h1>
-      <div className="text-sm text-(--text-muted) mt-1">
-        {post.author} · {post.readTime} min
+      <div className="text-sm text-(--text-muted) mt-1 font-mono">
+        [INFO] {post.date} · {post.author} · {post.readTime} min read
       </div>
       <div className="mt-3 flex gap-3 items-center justify-between">
         <div className="flex items-center gap-3">
           <LikeButton slug={post.slug} />
-          <ShareButtons title={post.title} slug={post.slug} />
+          <ShareButtons
+            title={post.title}
+            slug={post.slug}
+            url={`${siteUrl}/blog/${post.slug}`}
+          />
         </div>
-        <div className="text-sm text-(--text-muted)">
-          {post.tags?.join(", ")}
+        <div className="text-sm text-(--text-muted) font-mono">
+          {post.tags?.map((tag) => `#${tag}`).join(" ")}
         </div>
       </div>
       <div className="mt-6 prose max-w-none">

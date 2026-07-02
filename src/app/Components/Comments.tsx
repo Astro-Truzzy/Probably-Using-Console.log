@@ -38,23 +38,23 @@ export default function Comments({ slug }: { slug: string }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Name"
-          className="w-full p-2 bg-white/5 rounded"
+          className="field-input"
         />
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Comment"
-          className="w-full p-2 bg-white/5 rounded"
+          className="field-input"
           rows={4}
         />
-        <button className="px-3 py-1 bg-(--accent) rounded">
+        <button className="btn-accent px-4 py-2 rounded-lg text-sm font-medium">
           Post Comment
         </button>
       </form>
 
       <div className="mt-4 space-y-3">
         {comments.map((c, i) => (
-          <div key={i} className="p-3 bg-white/3 rounded">
+          <div key={i} className="p-3 surface-card">
             <div className="text-sm font-semibold">{c.name}</div>
             <div className="text-sm text-(--text-muted)">
               {new Date(c.date).toLocaleString()}

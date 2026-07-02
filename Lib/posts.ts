@@ -1,67 +1,87 @@
-import fs from 'fs'
-import path from 'path'
+import { cache } from "react";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { isSupabaseStorage } from "./config";
+import { toPostSummary } from "./post-utils";
+import * as jsonStore from "./posts-json";
+import * as supabaseStore from "./posts-supabase";
+import type { Comment, Post, PostPayload, PostSummary } from "./types";
 
-const DATA = path.join(process.cwd(), 'Lib', 'posts.json')
+const store = isSupabaseStorage() ? supabaseStore : jsonStore;
 
-export async function getAllPosts(){
-  const raw = fs.readFileSync(DATA, 'utf-8')
-  const posts = JSON.parse(raw)
-  return posts.sort((a:any,b:any)=> new Date(b.date).getTime() - new Date(a.date).getTime())
+export const POSTS_CACHE_TAG = "posts";
+
+export type { Comment, Post, PostPayload, PostSummary };
+
+async function loadAllPosts(): Promise<Post[]> {
+  return store.getAllPosts();
 }
 
-export async function getPostBySlug(slug:string){
-  const posts = await getAllPosts()
-  return posts.find((p:any)=> p.slug === slug)
-}
+const getCachedAllPosts = unstable_cache(loadAllPosts, ["posts-all"], {
+  tags: [POSTS_CACHE_TAG],
+  revalidate: 60,
+});
 
-export async function createPost(payload:any){
-  const posts = await getAllPosts()
-  const slug = (payload.title || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
-  const post = {
-    ...payload,
-    slug,
-    excerpt: payload.excerpt || (payload.content || '').slice(0,180),
-    author: payload.author || 'Trust Williams',
-    date: new Date().toISOString(),
-    readTime: payload.readTime || 6,
-    tags: payload.tags || []
+export const getAllPosts = cache(getCachedAllPosts);
+
+export const getPostSummaries = cache(async (): Promise<PostSummary[]> => {
+  const posts = await getAllPosts();
+  return posts.map(toPostSummary);
+});
+
+export const getPostBySlug = cache(async (slug: string): Promise<Post | undefined> => {
+  if (isSupabaseStorage()) {
+    const fetchPost = unstable_cache(
+      () => supabaseStore.getPostBySlug(slug),
+      ["post", slug],
+      { tags: [POSTS_CACHE_TAG, `post-${slug}`], revalidate: 60 }
+    );
+    return fetchPost();
   }
-  posts.unshift(post)
-  fs.writeFileSync(DATA, JSON.stringify(posts, null, 2))
-  return post
+
+  const posts = await getAllPosts();
+  return posts.find((post) => post.slug === slug);
+});
+
+function invalidatePosts(slug?: string) {
+  revalidateTag(POSTS_CACHE_TAG, "max");
+  if (slug) revalidateTag(`post-${slug}`, "max");
+  revalidatePath("/");
+  revalidatePath("/blog");
+  if (slug) revalidatePath(`/blog/${slug}`);
 }
 
-export async function updatePost(slug:string, payload:any){
-  const posts = await getAllPosts()
-  const idx = posts.findIndex((p:any)=> p.slug===slug)
-  if(idx === -1) return null
-  posts[idx] = { ...posts[idx], ...payload }
-  fs.writeFileSync(DATA, JSON.stringify(posts, null, 2))
-  return posts[idx]
+export async function createPost(payload: PostPayload): Promise<Post> {
+  const post = await store.createPost(payload);
+  invalidatePosts(post.slug);
+  return post;
 }
 
-export async function deletePost(slug:string){
-  const posts = await getAllPosts()
-  const filtered = posts.filter((p:any)=> p.slug !== slug)
-  fs.writeFileSync(DATA, JSON.stringify(filtered, null, 2))
-  return true
+export async function updatePost(
+  slug: string,
+  payload: PostPayload
+): Promise<Post | null> {
+  const updated = await store.updatePost(slug, payload);
+  if (updated) invalidatePosts(slug);
+  return updated;
 }
 
-export async function addComment(slug:string, comment:any){
-  const posts = await getAllPosts()
-  const idx = posts.findIndex((p:any)=> p.slug === slug)
-  if(idx === -1) throw new Error('post not found')
-  posts[idx].comments = posts[idx].comments || []
-  posts[idx].comments.push({ ...comment, date: new Date().toISOString() })
-  fs.writeFileSync(DATA, JSON.stringify(posts, null, 2))
-  return posts[idx].comments
+export async function deletePost(slug: string): Promise<boolean> {
+  const deleted = await store.deletePost(slug);
+  invalidatePosts(slug);
+  return deleted;
 }
 
-export async function addLike(slug:string){
-  const posts = await getAllPosts()
-  const idx = posts.findIndex((p:any)=> p.slug === slug)
-  if(idx === -1) throw new Error('post not found')
-  posts[idx].likes = (posts[idx].likes || 0) + 1
-  fs.writeFileSync(DATA, JSON.stringify(posts, null, 2))
-  return posts[idx].likes
+export async function addComment(
+  slug: string,
+  comment: Pick<Comment, "name" | "text">
+): Promise<Comment[]> {
+  const comments = await store.addComment(slug, comment);
+  invalidatePosts(slug);
+  return comments;
+}
+
+export async function addLike(slug: string): Promise<number> {
+  const likes = await store.addLike(slug);
+  invalidatePosts(slug);
+  return likes;
 }

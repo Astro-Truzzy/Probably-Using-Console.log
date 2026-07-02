@@ -8,14 +8,17 @@ const btn =
 export default function ShareButtons({
   title,
   slug,
+  url: shareUrl,
 }: {
   title: string;
   slug: string;
+  url?: string;
 }) {
   const url =
-    typeof window !== "undefined"
+    shareUrl ??
+    (typeof window !== "undefined"
       ? window.location.origin + `/blog/${slug}`
-      : `https://probably-using-console-log.vercel.app/blog/${slug}`;
+      : `/blog/${slug}`);
 
   function shareTwitter() {
     const href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(

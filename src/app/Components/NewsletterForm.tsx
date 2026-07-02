@@ -20,12 +20,15 @@ export default function NewsletterForm() {
     <form onSubmit={submit} className="mt-6">
       <div className="flex gap-2 max-w-md">
         <input
+          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="flex-1 p-2 bg-white/5 rounded"
+          className="field-input flex-1"
         />
-        <button className="px-3 py-2 bg-(--accent) rounded">Join</button>
+        <button className="btn-accent px-4 py-2 rounded-lg text-sm font-medium">
+          Join
+        </button>
       </div>
       {status && <div className="mt-2 text-sm">{status}</div>}
     </form>

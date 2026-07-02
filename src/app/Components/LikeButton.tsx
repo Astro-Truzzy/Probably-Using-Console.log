@@ -27,7 +27,7 @@ export default function LikeButton({ slug }: { slug: string }) {
     <button
       onClick={like}
       disabled={loading}
-      className="px-3 py-1 bg-white/5 rounded"
+      className="surface-card px-3 py-1 hover:border-(--accent) disabled:opacity-50"
     >
       👍 {likes}
     </button>

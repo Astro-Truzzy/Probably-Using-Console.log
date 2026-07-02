@@ -1,17 +1,21 @@
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="w-full bg-[#020617] text-(--text-muted) py-8">
-      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
+    <footer className="w-full bg-(--bg-footer) text-(--text-muted) py-8 font-mono text-sm">
+      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
-          <strong>
-            Powered by Trust Williams — Probably Using Console.log()
-          </strong>
-          <div className="text-sm mt-2">
+          <div className="text-(--text-main)">
+            <span className="text-(--accent)">process.exit(0)</span>
+            {" — "}
+            Powered by Trust Williams
+          </div>
+          <div className="mt-2 text-xs">
             Follow: GitHub · Twitter · LinkedIn
           </div>
         </div>
-        <div className="mt-4 md:mt-0 text-sm">
-          © {new Date().getFullYear()} Trust Williams
+        <div className="text-xs">
+          © {year} Trust Williams — probably using console.log()
         </div>
       </div>
     </footer>
