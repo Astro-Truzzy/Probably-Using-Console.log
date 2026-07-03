@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -15,12 +14,15 @@ import {
   type TerminalLine,
 } from "./commands";
 import { setTheme } from "./theme";
+import TerminalEntryView from "./TerminalEntryView";
 import { useReducedMotion } from "./useTypewriter";
 
 export interface TerminalEntry {
   id: string;
   command?: string;
   lines: TerminalLine[];
+  /** When true, output lines typewriter in on mount. Defaults to true for new entries. */
+  animate?: boolean;
 }
 
 interface TerminalProps {
@@ -44,13 +46,6 @@ const DEFAULT_SUGGESTIONS = [
   "console.log('hello!')",
 ];
 
-function lineClass(line: TerminalLine): string {
-  if (line.kind === "error") return "terminal-line-error";
-  if (line.kind === "success") return "terminal-line-success";
-  if (line.kind === "link") return "terminal-line-link";
-  return line.className ?? "";
-}
-
 export default function Terminal({
   posts = [],
   bootSequence = [],
@@ -67,25 +62,41 @@ export default function Terminal({
   const [input, setInput] = useState("");
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [bootDone, setBootDone] = useState(bootSequence.length === 0);
+  const [activeBootIndex, setActiveBootIndex] = useState(
+    bootSequence.length === 0 || reducedMotion ? bootSequence.length : 0
+  );
+  const [bootDone, setBootDone] = useState(
+    bootSequence.length === 0 || reducedMotion
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (bootSequence.length === 0) {
-      setBootDone(true);
-      return;
-    }
-    const totalDelay = reducedMotion
-      ? 0
-      : bootSequence.reduce((acc, entry) => acc + entry.lines.length * 120 + 400, 600);
-    const timer = window.setTimeout(() => setBootDone(true), totalDelay);
-    return () => window.clearTimeout(timer);
-  }, [bootSequence, reducedMotion]);
+  const scrollToBottom = useCallback(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, []);
+
+  const handleBootEntryComplete = useCallback(
+    (bootIndex: number) => {
+      if (bootIndex + 1 >= bootSequence.length) {
+        setBootDone(true);
+        setActiveBootIndex(bootSequence.length);
+      } else {
+        setActiveBootIndex(bootIndex + 1);
+      }
+    },
+    [bootSequence.length]
+  );
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [entries, input]);
+    if (bootSequence.length === 0 || reducedMotion) {
+      setBootDone(true);
+      setActiveBootIndex(bootSequence.length);
+    }
+  }, [bootSequence.length, reducedMotion]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [entries, input, scrollToBottom]);
 
   useEffect(() => {
     if (autoFocus && bootDone) {
@@ -125,12 +136,13 @@ export default function Terminal({
           id: `${Date.now()}-${Math.random()}`,
           command: cmd,
           lines: result.lines,
+          animate: !reducedMotion,
         },
       ]);
       setCommandHistory((h) => [...h, cmd]);
       setHistoryIndex(-1);
     },
-    [posts, commandHistory, onNavigate, onClose]
+    [posts, commandHistory, onNavigate, onClose, reducedMotion]
   );
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -190,32 +202,31 @@ export default function Terminal({
   return (
     <div className={`terminal-shell font-mono text-sm ${className}`}>
       <div ref={scrollRef} className="terminal-scroll">
-        {entries.map((entry) => (
-          <div key={entry.id} className="terminal-entry">
-            {entry.command && (
-              <div className="prompt-line">
-                <span className="prompt-user">{promptUser}</span>
-                <span className="prompt-at">@</span>
-                <span className="prompt-host">console.log</span>
-                <span className="prompt-colon">:</span>
-                <span className="prompt-path">~</span>
-                <span className="prompt-dollar">$</span>{" "}
-                <span>{entry.command}</span>
-              </div>
-            )}
-            {entry.lines.map((line, i) => (
-              <div key={i} className={`terminal-line ${lineClass(line)}`}>
-                {line.kind === "link" ? (
-                  <Link href={line.href} className="underline-offset-2 hover:underline">
-                    {line.text}
-                  </Link>
-                ) : (
-                  line.text
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
+        {entries.map((entry) => {
+          const bootIndex = bootSequence.findIndex((e) => e.id === entry.id);
+          const isBootEntry = bootIndex >= 0;
+          if (isBootEntry && bootIndex > activeBootIndex) return null;
+
+          const shouldAnimate =
+            !reducedMotion &&
+            entry.animate !== false &&
+            (!isBootEntry || bootIndex === activeBootIndex);
+
+          return (
+            <TerminalEntryView
+              key={entry.id}
+              entry={entry}
+              animate={shouldAnimate}
+              promptUser={promptUser}
+              onComplete={
+                isBootEntry && bootIndex === activeBootIndex
+                  ? () => handleBootEntryComplete(bootIndex)
+                  : undefined
+              }
+              onTick={scrollToBottom}
+            />
+          );
+        })}
 
         {inputEnabled && (
           <div

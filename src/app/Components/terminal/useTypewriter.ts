@@ -7,6 +7,22 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+/** Ms per character — shorter output types slower, longer output speeds up. */
+export function getTypewriterCharDelay(totalLength: number): number {
+  if (totalLength <= 0) return 0;
+  const minDuration = 350;
+  const maxDuration = 2200;
+  const duration = Math.min(
+    maxDuration,
+    Math.max(minDuration, 18 * Math.sqrt(totalLength) + 80)
+  );
+  return duration / totalLength;
+}
+
+export function getTotalTextLength(lines: { text: string }[]): number {
+  return lines.reduce((sum, line) => sum + line.text.length, 0);
+}
+
 export function useTypewriter(
   text: string,
   speed = 24,
