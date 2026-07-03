@@ -1,5 +1,6 @@
 import { getPostBySlug, getAllPosts } from "../../../../Lib/posts";
 import { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -52,6 +53,19 @@ export default async function PostPage({ params }: { params: { slug: string } })
           {post.tags?.map((tag) => `#${tag}`).join(" ")}
         </div>
       </div>
+      {post.cover && (
+        <div className="mt-6 blog-post-cover">
+          <Image
+            src={post.cover}
+            alt={post.title}
+            width={1200}
+            height={675}
+            className="blog-post-cover-image"
+            priority
+            sizes="(max-width: 768px) 100vw, 768px"
+          />
+        </div>
+      )}
       <div className="mt-6 prose max-w-none">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}

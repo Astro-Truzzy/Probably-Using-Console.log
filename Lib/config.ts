@@ -13,6 +13,13 @@ export const authorName = "Trust Williams";
 
 export const authorEmail = "Taresy.dev@gmail.com";
 
+export const socialLinks = {
+  github:
+    process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com/Astro-Truzzy",
+  twitter: process.env.NEXT_PUBLIC_TWITTER_URL ?? "",
+  linkedIn: process.env.NEXT_PUBLIC_LINKEDIN_URL ?? "",
+} as const;
+
 /** Google Search Console HTML tag verification code (meta content value only). */
 export const googleSiteVerification =
   process.env.GOOGLE_SITE_VERIFICATION ?? "";

@@ -60,7 +60,11 @@ vercel env add CONTACT_NOTIFY_EMAIL
 vercel --prod
 ```
 
-## 4. Post-deploy checklist
+## 4. Custom domain (Hostinger)
+
+Your domain is registered at **Hostinger**. To point it at Vercel (e.g. `probably-using-console.log`), follow **[CUSTOM_DOMAIN.md](./CUSTOM_DOMAIN.md)** — hPanel DNS records, env vars, redeploy, and Hostinger-specific troubleshooting.
+
+## 5. Post-deploy checklist
 
 - [ ] Visit `/` and `/blog` — posts load from Supabase
 - [ ] Open a post — likes and comments persist after refresh
