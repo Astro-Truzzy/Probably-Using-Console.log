@@ -1,5 +1,6 @@
 import type { PostSummary } from "@lib/types";
 import { siteDescription } from "@lib/config";
+import { randomFallbackJoke, type JokeResult } from "@lib/jokes";
 
 export type TerminalAction =
   | { type: "navigate"; href: string }
@@ -48,14 +49,16 @@ const COMMANDS = [
   "joke",
 ];
 
-const JOKES = [
-  "Why do programmers prefer dark mode? Because light attracts bugs.",
-  "There are only 10 kinds of people: those who understand binary and those who don't.",
-  "A SQL query walks into a bar, walks up to two tables and asks: 'Can I join you?'",
-  "!false — it's funny because it's true.",
-  "How do you comfort a JavaScript bug? You console it.",
-  "99 little bugs in the code, 99 little bugs… take one down, patch it around, 127 little bugs in the code.",
-];
+function jokeLines(result: JokeResult): TerminalLine[] {
+  if (result.lines.length === 2) {
+    return [
+      { kind: "output", text: result.lines[0] },
+      { kind: "success", text: result.lines[1] },
+    ];
+  }
+
+  return result.lines.map((text) => ({ kind: "success" as const, text }));
+}
 
 function helpLines(): TerminalLine[] {
   return [
@@ -160,10 +163,15 @@ export async function executeCommand(
   }
 
   if (lower === "joke") {
-    const joke = JOKES[Math.floor(Math.random() * JOKES.length)];
-    return {
-      lines: [{ kind: "success", text: joke }],
-    };
+    let result: JokeResult;
+    try {
+      const res = await fetch("/api/joke");
+      if (!res.ok) throw new Error("request failed");
+      result = (await res.json()) as JokeResult;
+    } catch {
+      result = randomFallbackJoke();
+    }
+    return { lines: jokeLines(result) };
   }
 
   if (lower === "sudo") {
