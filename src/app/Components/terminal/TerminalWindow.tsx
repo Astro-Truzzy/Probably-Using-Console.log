@@ -16,9 +16,7 @@ export default function TerminalWindow({
   scanlines = false,
 }: TerminalWindowProps) {
   return (
-    <div
-      className={`terminal-window ${scanlines ? "terminal-scanlines" : ""} ${className}`}
-    >
+    <div className={`terminal-window ${className}`}>
       <div className="terminal-titlebar">
         <div className="terminal-traffic-lights" aria-hidden="true">
           <span className="terminal-light terminal-light-red" />
@@ -27,7 +25,9 @@ export default function TerminalWindow({
         </div>
         <span className="terminal-title">{title}</span>
       </div>
-      <div className="terminal-body">{children}</div>
+      <div className={`terminal-body ${scanlines ? "terminal-scanlines" : ""}`}>
+        {children}
+      </div>
     </div>
   );
 }

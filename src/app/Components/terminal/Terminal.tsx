@@ -29,6 +29,8 @@ interface TerminalProps {
   posts?: PostSummary[];
   bootSequence?: TerminalEntry[];
   showInput?: boolean;
+  /** Show tappable command chips (defaults to showInput). */
+  showSuggestions?: boolean;
   autoFocus?: boolean;
   onNavigate?: (href: string) => void;
   onClose?: () => void;
@@ -50,6 +52,7 @@ export default function Terminal({
   posts = [],
   bootSequence = [],
   showInput = true,
+  showSuggestions,
   autoFocus = false,
   onNavigate,
   onClose,
@@ -206,6 +209,8 @@ export default function Terminal({
   }
 
   const inputEnabled = showInput && bootDone;
+  const suggestionsEnabled =
+    (showSuggestions ?? showInput) && bootDone && suggestions.length > 0;
 
   return (
     <div className={`terminal-shell font-mono text-sm ${className}`}>
@@ -274,7 +279,7 @@ export default function Terminal({
         )}
       </div>
 
-      {inputEnabled && suggestions.length > 0 && (
+      {suggestionsEnabled && (
         <div className="terminal-suggestions" aria-label="Suggested commands">
           <span className="terminal-suggestions-label">Try:</span>
           {suggestions.map((cmd) => (

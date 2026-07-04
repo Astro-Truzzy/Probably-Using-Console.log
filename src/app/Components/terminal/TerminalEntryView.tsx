@@ -26,7 +26,7 @@ function TerminalLineContent({
 }) {
   if (line.kind === "link") {
     return (
-      <Link href={line.href} className="underline-offset-2 hover:underline">
+      <Link href={line.href} className="terminal-post-link">
         {text}
       </Link>
     );

@@ -12,11 +12,17 @@ interface HeroTerminalProps {
   posts: PostSummary[];
 }
 
-function buildHeroBootSequence(featured: PostSummary[]): TerminalEntry[] {
+function buildHeroBootSequence(
+  featured: PostSummary[],
+  { mobile }: { mobile: boolean }
+): TerminalEntry[] {
+  const animate = !mobile;
+
   return [
     {
       id: "boot-1",
       command: "whoami",
+      animate,
       lines: [
         { kind: "output", text: "visitor@console.log" },
         { kind: "output", text: siteDescription },
@@ -25,21 +31,27 @@ function buildHeroBootSequence(featured: PostSummary[]): TerminalEntry[] {
     {
       id: "boot-2",
       command: "ls posts --featured",
+      animate,
       lines: [
         { kind: "output", text: `total ${featured.length}` },
         ...featured.map((post) => ({
           kind: "link" as const,
-          text: `  ${post.slug.padEnd(28)} ${post.title}`,
+          text: mobile
+            ? post.title
+            : `  ${post.slug.padEnd(28)} ${post.title}`,
           href: `/blog/${post.slug}`,
         })),
       ],
     },
     {
       id: "boot-3",
+      animate,
       lines: [
         {
           kind: "output",
-          text: "Type 'help' to explore. Press Ctrl+` to summon terminal anywhere.",
+          text: mobile
+            ? "Tap a post title above, or use the commands below."
+            : "Type 'help' to explore. Press Ctrl+` to summon terminal anywhere.",
           className: "terminal-muted",
         },
       ],
@@ -47,14 +59,16 @@ function buildHeroBootSequence(featured: PostSummary[]): TerminalEntry[] {
   ];
 }
 
+const MOBILE_SUGGESTIONS = ["help", "ls posts", "whoami"];
+
 export default function HeroTerminal({ posts }: HeroTerminalProps) {
   const router = useRouter();
   const featured = posts.slice(0, 3);
-  const [showInput, setShowInput] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
-    const update = () => setShowInput(!mq.matches);
+    const update = () => setIsMobile(mq.matches);
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
@@ -63,16 +77,19 @@ export default function HeroTerminal({ posts }: HeroTerminalProps) {
   return (
     <TerminalWindow title="~/probably-using-console.log" scanlines>
       <Terminal
+        key={isMobile ? "mobile" : "desktop"}
         posts={posts}
-        bootSequence={buildHeroBootSequence(featured)}
-        showInput={showInput}
+        bootSequence={buildHeroBootSequence(featured, { mobile: isMobile })}
+        showInput={!isMobile}
+        showSuggestions
+        suggestions={isMobile ? MOBILE_SUGGESTIONS : undefined}
         autoFocus={false}
         onNavigate={(href) => router.push(href)}
         className="hero-terminal"
       />
-      {!showInput && (
+      {isMobile && (
         <p className="mt-2 text-xs font-mono terminal-muted sm:hidden">
-          Tap a post link above, or press &gt;_ in the nav to open the full terminal.
+          Or press &gt;_ in the nav for the full terminal with keyboard input.
         </p>
       )}
     </TerminalWindow>
