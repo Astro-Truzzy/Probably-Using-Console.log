@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  canAccessAdmin,
   clearGateCookie,
   clearLegacyAdminCookie,
   clearSessionCookie,
   createAdminSessionToken,
   isAuthConfigured,
-  requireAdmin,
   sessionCookie,
   verifyPassword,
 } from "@lib/auth";
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  return NextResponse.json({ authenticated: await requireAdmin(req) });
+  return NextResponse.json({ authenticated: await canAccessAdmin(req) });
 }
 
 export async function DELETE() {

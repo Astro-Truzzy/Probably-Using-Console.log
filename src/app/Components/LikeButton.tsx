@@ -50,20 +50,36 @@ function HeartIcon({ filled }: { filled: boolean }) {
 export default function LikeButton({ slug }: { slug: string }) {
   const [likes, setLikes] = useState<number>(0);
   const [loading, setLoading] = useState(false);
-  const [liked, setLiked] = useState(false);
+  /** null = not yet read from storage (avoids SSR/client hydration mismatch) */
+  const [liked, setLiked] = useState<boolean | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLiked(localStorage.getItem(likedStorageKey(slug)) === "1");
+    let cancelled = false;
+
+    try {
+      const stored = localStorage.getItem(likedStorageKey(slug)) === "1";
+      if (!cancelled) setLiked(stored);
+    } catch {
+      if (!cancelled) setLiked(false);
+    }
 
     fetch(`/api/likes?slug=${slug}`)
       .then((r) => r.json())
-      .then((d) => setLikes(d.likes || 0))
-      .catch(() => setError("Could not load likes."));
+      .then((d) => {
+        if (!cancelled) setLikes(d.likes || 0);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Could not load likes.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   async function like() {
-    if (liked) return;
+    if (liked === true) return;
 
     setLoading(true);
     setError("");
@@ -101,16 +117,16 @@ export default function LikeButton({ slug }: { slug: string }) {
       <button
         type="button"
         onClick={like}
-        disabled={loading || liked}
+        disabled={loading || liked === true}
         aria-label={
-          liked
+          liked === true
             ? `You liked this post. ${likes} likes`
             : `Like this post. ${likes} likes`
         }
-        aria-pressed={liked}
+        aria-pressed={liked === true}
         className={`${btn} neon-btn flex items-center gap-2 disabled:opacity-50`}
       >
-        <HeartIcon filled={liked} />
+        <HeartIcon filled={liked === true} />
         <span>{likes}</span>
       </button>
       {error && (
