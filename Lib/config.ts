@@ -4,6 +4,32 @@ export const siteUrl = (
   "https://probably-using-console.log"
 ).replace(/\/$/, "");
 
+/** Hostname from the configured canonical site URL (no port). */
+export const canonicalHost = new URL(siteUrl).host;
+
+/**
+ * Site URL for the current request. Sitemap and robots URLs must match the
+ * host serving them or Search Console reports "URL not allowed".
+ */
+export async function getRequestSiteUrl(): Promise<string> {
+  try {
+    const { headers } = await import("next/headers");
+    const headersList = await headers();
+    const host =
+      headersList.get("x-forwarded-host")?.split(",")[0]?.trim() ??
+      headersList.get("host");
+    const protocol = headersList.get("x-forwarded-proto") ?? "https";
+
+    if (host) {
+      return `${protocol}://${host}`.replace(/\/$/, "");
+    }
+  } catch {
+    // headers() is unavailable outside a request (build, static generation).
+  }
+
+  return siteUrl;
+}
+
 export const siteName = "Probably Using Console.log()";
 
 export const siteDescription =

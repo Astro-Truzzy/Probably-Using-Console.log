@@ -41,7 +41,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
       <div className="text-sm text-(--text-muted) mt-1 font-mono">
         [INFO] {post.date} · {post.author} · {post.readTime} min read
       </div>
-      <div className="mt-3 flex gap-3 items-center justify-between">
+      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <LikeButton slug={post.slug} />
           <ShareButtons
@@ -50,7 +50,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
             url={`${siteUrl}/blog/${post.slug}`}
           />
         </div>
-        <div className="text-sm text-(--text-muted) font-mono flex flex-wrap gap-2">
+        <div className="text-sm text-(--text-muted) font-mono flex flex-wrap gap-x-2 gap-y-1">
           {post.tags?.map((tag) => (
             <Link
               key={tag}
@@ -60,7 +60,8 @@ export default async function PostPage({ params }: { params: { slug: string } })
               {tag}
             </Link>
           ))}
-        </div>      </div>
+        </div>
+      </div>
       {post.cover && (
         <div className="mt-6 blog-post-cover">
           <Image
