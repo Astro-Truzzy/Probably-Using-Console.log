@@ -1,20 +1,21 @@
 import { getPostBySlug, getAllPosts } from "../../../../Lib/posts";
 import { Metadata } from "next";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.min.css";
+import BlogMarkdown from "../../Components/BlogMarkdown";
+import BlogTableOfContents from "../../Components/BlogTableOfContents";
 import { articleJsonLd, articleMetadata } from "@lib/seo";
 import { siteUrl } from "@lib/config";
 import JsonLd from "../../Components/JsonLd";
-import LikeButton from "../../Components/LikeButton";
-import Comments from "../../Components/Comments";
-import NewsletterForm from "../../Components/NewsletterForm";
-import ShareButtons from "../../Components/ShareButtons";
 import ConsoleBreadcrumb from "../../Components/terminal/ConsoleBreadcrumb";
 
+const LikeButton = dynamic(() => import("../../Components/LikeButton"));
+const ShareButtons = dynamic(() => import("../../Components/ShareButtons"));
+const Comments = dynamic(() => import("../../Components/Comments"));
+const NewsletterForm = dynamic(() => import("../../Components/NewsletterForm"));
 export async function generateStaticParams() {
   const posts = await getAllPosts();
   return posts.map((p: { slug: string }) => ({ slug: p.slug }));
@@ -49,10 +50,17 @@ export default async function PostPage({ params }: { params: { slug: string } })
             url={`${siteUrl}/blog/${post.slug}`}
           />
         </div>
-        <div className="text-sm text-(--text-muted) font-mono">
-          {post.tags?.map((tag) => `#${tag}`).join(" ")}
-        </div>
-      </div>
+        <div className="text-sm text-(--text-muted) font-mono flex flex-wrap gap-2">
+          {post.tags?.map((tag) => (
+            <Link
+              key={tag}
+              href={`/blog?tag=${encodeURIComponent(tag)}`}
+              className="tag-flag hover:underline"
+            >
+              {tag}
+            </Link>
+          ))}
+        </div>      </div>
       {post.cover && (
         <div className="mt-6 blog-post-cover">
           <Image
@@ -66,14 +74,8 @@ export default async function PostPage({ params }: { params: { slug: string } })
           />
         </div>
       )}
-      <div className="mt-6 prose max-w-none">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeHighlight]}
-        >
-          {post.content}
-        </ReactMarkdown>
-      </div>
+      <BlogTableOfContents content={post.content} />
+      <BlogMarkdown content={post.content} />
       <Comments slug={post.slug} />
       <NewsletterForm />
     </article>

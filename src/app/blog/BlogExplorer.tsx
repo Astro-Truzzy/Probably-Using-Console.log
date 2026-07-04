@@ -6,9 +6,15 @@ import type { PostSummary } from "@lib/types";
 
 const PAGE_SIZE = 6;
 
-export default function BlogExplorer({ posts }: { posts: PostSummary[] }) {
+export default function BlogExplorer({
+  posts,
+  initialTag = null,
+}: {
+  posts: PostSummary[];
+  initialTag?: string | null;
+}) {
   const [query, setQuery] = useState("");
-  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [activeTag, setActiveTag] = useState<string | null>(initialTag);
   const [page, setPage] = useState(1);
 
   const tags = useMemo(
@@ -51,7 +57,7 @@ export default function BlogExplorer({ posts }: { posts: PostSummary[] }) {
               setPage(1);
             }}
             placeholder="search posts..."
-            className="grep-input focus-neon"
+            className="grep-input"
             aria-label="Search posts"
           />
         </div>
@@ -61,6 +67,7 @@ export default function BlogExplorer({ posts }: { posts: PostSummary[] }) {
               setActiveTag(null);
               setPage(1);
             }}
+            aria-pressed={activeTag === null}
             className={`px-3 py-1 rounded border ${
               activeTag === null
                 ? "bg-(--accent) text-black border-(--accent)"
@@ -76,6 +83,7 @@ export default function BlogExplorer({ posts }: { posts: PostSummary[] }) {
                 setActiveTag(activeTag === tag ? null : tag);
                 setPage(1);
               }}
+              aria-pressed={activeTag === tag}
               className={`tag-flag px-2 py-1 rounded border ${
                 activeTag === tag
                   ? "bg-(--accent) text-black border-(--accent)"
@@ -104,10 +112,11 @@ export default function BlogExplorer({ posts }: { posts: PostSummary[] }) {
         </p>
       )}
 
-      <div className="mt-6 flex items-center justify-center font-mono text-sm">
+      <div className="mt-6 flex items-center justify-center font-mono text-sm" role="navigation" aria-label="Blog pagination">
         <button
           onClick={() => setPageSafe(page - 1)}
           disabled={page <= 1}
+          aria-label="Previous page"
           className="px-3 py-1 bg-[var(--surface)] border border-[var(--surface-border)] rounded mr-2 disabled:opacity-40"
         >
           prev
@@ -118,6 +127,7 @@ export default function BlogExplorer({ posts }: { posts: PostSummary[] }) {
         <button
           onClick={() => setPageSafe(page + 1)}
           disabled={page >= totalPages}
+          aria-label="Next page"
           className="px-3 py-1 bg-[var(--surface)] border border-[var(--surface-border)] rounded ml-2 disabled:opacity-40"
         >
           next

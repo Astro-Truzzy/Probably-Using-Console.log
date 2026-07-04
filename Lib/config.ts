@@ -31,9 +31,16 @@ export const resendFromEmail =
   process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
 
 export function isSupabaseStorage(): boolean {
-  return Boolean(
-    process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return false;
+
+  try {
+    const hostname = new URL(url).hostname;
+    return /^[a-z0-9-]{6,}\.supabase\.co$/i.test(hostname);
+  } catch {
+    return false;
+  }
 }
 
 export function isResendConfigured(): boolean {

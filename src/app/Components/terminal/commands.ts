@@ -3,7 +3,7 @@ import { siteDescription } from "@lib/config";
 import { randomFallbackJoke, type JokeResult } from "@lib/jokes";
 
 export type TerminalAction =
-  | { type: "navigate"; href: string }
+  | { type: "navigate"; href: string; hard?: boolean }
   | { type: "close" }
   | { type: "clear" }
   | { type: "theme"; theme: "dark" | "light" };
@@ -29,7 +29,6 @@ const ROUTES: Record<string, string> = {
   about: "/about",
   contact: "/contact",
   home: "/",
-  admin: "/admin",
 };
 
 const COMMANDS = [
@@ -252,12 +251,47 @@ export async function executeCommand(
     return { lines: lsPosts(ctx.posts, featuredOnly) };
   }
 
+  const gateResult = await tryAdminGate(trimmed);
+  if (gateResult) return gateResult;
+
   return {
     lines: [
       { kind: "error", text: `command not found: ${trimmed.split(/\s+/)[0]}` },
       { kind: "output", text: "Try 'help' for available commands.", className: "terminal-muted" },
     ],
   };
+}
+
+async function tryAdminGate(input: string): Promise<CommandResult | null> {
+  try {
+    const res = await fetch("/api/auth/gate", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phrase: input }),
+    });
+
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as { gate?: string };
+    if (!data.gate) return null;
+
+    const target = `/api/auth/gate/enter?gate=${encodeURIComponent(data.gate)}`;
+
+    return {
+      lines: [
+        { kind: "success", text: "Domain expanded." },
+        {
+          kind: "output",
+          text: "Restricted area unlocked… redirecting",
+          className: "terminal-muted",
+        },
+      ],
+      action: { type: "navigate", href: target, hard: true },
+    };
+  } catch {
+    return null;
+  }
 }
 
 export function getAutocomplete(input: string, posts: PostSummary[]): string | null {

@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { PointerEvent } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useState, type PointerEvent } from "react";
 import { useReducedMotion } from "./terminal/useTypewriter";
 
 interface AboutPhotoProps {
@@ -17,40 +16,30 @@ export default function AboutPhoto({
   initials = "TW",
 }: AboutPhotoProps) {
   const reducedMotion = useReducedMotion();
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 260, damping: 22 });
-  const springY = useSpring(y, { stiffness: 260, damping: 22 });
-  const rotateX = useTransform(springY, [-0.5, 0.5], [8, -8]);
-  const rotateY = useTransform(springX, [-0.5, 0.5], [-8, 8]);
+  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
     if (reducedMotion) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const offsetX = (event.clientX - rect.left) / rect.width - 0.5;
     const offsetY = (event.clientY - rect.top) / rect.height - 0.5;
-    x.set(offsetX);
-    y.set(offsetY);
+    setTilt({ rotateX: -offsetY * 16, rotateY: offsetX * 16 });
   }
 
   function handlePointerLeave() {
-    x.set(0);
-    y.set(0);
+    setTilt({ rotateX: 0, rotateY: 0 });
   }
 
   return (
-    <motion.div
-      className="about-photo-wrap"
-      initial={reducedMotion ? false : { opacity: 0, y: 24, scale: 0.94 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <motion.div
+    <div className={`about-photo-wrap${reducedMotion ? " about-photo-wrap--static" : ""}`}>
+      <div
         className="about-photo-tilt"
         style={
           reducedMotion
             ? undefined
-            : { rotateX, rotateY, transformPerspective: 900 }
+            : {
+                transform: `perspective(900px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+              }
         }
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
@@ -77,11 +66,7 @@ export default function AboutPhoto({
             </div>
           )}
         </div>
-      </motion.div>
-      {/* <p className="mt-3 text-center font-mono text-xs text-(--text-muted)">
-        <span className="text-(--accent)">//</span> drop your photo in{" "}
-        <code className="text-(--text-main)">public/profile.jpg</code>
-      </p> */}
-    </motion.div>
+      </div>
+    </div>
   );
 }

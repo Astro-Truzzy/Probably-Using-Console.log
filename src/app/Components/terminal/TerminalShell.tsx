@@ -1,19 +1,21 @@
 "use client";
 
-import type { PostSummary } from "@lib/types";
-import TerminalOverlay from "./TerminalOverlay";
+import dynamic from "next/dynamic";
 import { TerminalProvider } from "./TerminalContext";
 
+const TerminalOverlay = dynamic(() => import("./TerminalOverlay"), {
+  ssr: false,
+});
+
 interface TerminalShellProps {
-  posts: PostSummary[];
   children: React.ReactNode;
 }
 
-export default function TerminalShell({ posts, children }: TerminalShellProps) {
+export default function TerminalShell({ children }: TerminalShellProps) {
   return (
     <TerminalProvider>
       {children}
-      <TerminalOverlay posts={posts} />
+      <TerminalOverlay />
     </TerminalProvider>
   );
 }

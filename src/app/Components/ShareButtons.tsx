@@ -1,9 +1,9 @@
 "use client";
-import { motion } from "framer-motion";
-import React from "react";
+
+import { useState } from "react";
 
 const btn =
-  "px-3 py-1 rounded backdrop-blur glass transition-transform duration-200 text-sm";
+  "px-3 py-1 rounded backdrop-blur glass transition-transform duration-200 hover:scale-[1.06] active:scale-[0.98] text-sm";
 
 export default function ShareButtons({
   title,
@@ -14,6 +14,8 @@ export default function ShareButtons({
   slug: string;
   url?: string;
 }) {
+  const [toast, setToast] = useState("");
+
   const url =
     shareUrl ??
     (typeof window !== "undefined"
@@ -24,28 +26,31 @@ export default function ShareButtons({
     const href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       title
     )}&url=${encodeURIComponent(url)}`;
-    window.open(href, "_blank");
+    window.open(href, "_blank", "noopener,noreferrer");
   }
 
   function shareLinkedIn() {
     const href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
       url
     )}`;
-    window.open(href, "_blank");
+    window.open(href, "_blank", "noopener,noreferrer");
   }
 
   async function copyLink() {
-    await navigator.clipboard.writeText(url);
-    const el = document.createElement("div");
-    el.innerText = "Link copied";
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1200);
+    try {
+      await navigator.clipboard.writeText(url);
+      setToast("Link copied");
+      setTimeout(() => setToast(""), 2000);
+    } catch {
+      setToast("Copy failed");
+      setTimeout(() => setToast(""), 2000);
+    }
   }
 
   return (
     <div className="flex gap-2 items-center">
-      <motion.button
-        whileHover={{ scale: 1.06 }}
+      <button
+        type="button"
         onClick={shareTwitter}
         className={`${btn} neon-btn flex items-center gap-2`}
         aria-label="Share on Twitter"
@@ -64,10 +69,10 @@ export default function ShareButtons({
           />
         </svg>
         <span className="hidden sm:inline">Twitter</span>
-      </motion.button>
+      </button>
 
-      <motion.button
-        whileHover={{ scale: 1.06 }}
+      <button
+        type="button"
         onClick={shareLinkedIn}
         className={`${btn} neon-btn flex items-center gap-2`}
         aria-label="Share on LinkedIn"
@@ -86,10 +91,10 @@ export default function ShareButtons({
           />
         </svg>
         <span className="hidden sm:inline">LinkedIn</span>
-      </motion.button>
+      </button>
 
-      <motion.button
-        whileHover={{ scale: 1.06 }}
+      <button
+        type="button"
         onClick={copyLink}
         className={`${btn} neon-btn flex items-center gap-2`}
         aria-label="Copy link"
@@ -118,7 +123,11 @@ export default function ShareButtons({
           />
         </svg>
         <span className="hidden sm:inline">Copy</span>
-      </motion.button>
+      </button>
+
+      <span className="sr-only" role="status" aria-live="polite">
+        {toast}
+      </span>
     </div>
   );
 }

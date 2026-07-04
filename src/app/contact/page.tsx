@@ -25,9 +25,9 @@ export default function Contact() {
       <ConsoleBreadcrumb segments={["contact"]} />
       <h1 className="text-3xl font-mono">Contact</h1>
 
-      <div className="mt-6 terminal max-w-3xl">
+      <div className="mt-6 terminal terminal-panel max-w-3xl">
         <p className="text-lg leading-relaxed">{contactIntro.summary}</p>
-        <p className="mt-4 text-(--text-muted) leading-relaxed">
+        <p className="mt-4 terminal-muted leading-relaxed">
           {contactIntro.detail}
         </p>
       </div>

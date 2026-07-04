@@ -28,6 +28,7 @@ function slugify(title: string): string {
 
 function buildPost(payload: PostPayload): Post {
   const slug = slugify(payload.title || "untitled");
+  const now = new Date().toISOString();
   return {
     ...payload,
     slug,
@@ -35,7 +36,8 @@ function buildPost(payload: PostPayload): Post {
     excerpt: payload.excerpt || (payload.content || "").slice(0, 180),
     content: payload.content || "",
     author: payload.author || "Trust Williams",
-    date: new Date().toISOString(),
+    date: now,
+    updatedAt: now,
     readTime: payload.readTime || 6,
     tags: payload.tags || [],
     comments: [],
@@ -67,7 +69,11 @@ export async function updatePost(
   const posts = await getAllPosts();
   const idx = posts.findIndex((p) => p.slug === slug);
   if (idx === -1) return null;
-  posts[idx] = { ...posts[idx], ...payload };
+  posts[idx] = {
+    ...posts[idx],
+    ...payload,
+    updatedAt: new Date().toISOString(),
+  };
   writePosts(posts);
   return posts[idx];
 }

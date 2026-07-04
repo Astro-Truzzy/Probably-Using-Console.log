@@ -81,6 +81,9 @@ export function rootMetadata(): Metadata {
     },
     alternates: {
       canonical: siteUrl,
+      types: {
+        "application/rss+xml": `${siteUrl}/feed.xml`,
+      },
     },
     openGraph: {
       title: siteName,
@@ -170,7 +173,7 @@ export function articleMetadata(post: Post): Metadata {
       locale: "en_US",
       type: "article",
       publishedTime: post.date,
-      modifiedTime: post.date,
+      modifiedTime: post.updatedAt ?? post.date,
       authors: [post.author || authorName],
       tags: post.tags,
       images,
@@ -230,7 +233,7 @@ export function articleJsonLd(post: Post) {
       url: `${siteUrl}/about`,
     },
     datePublished: post.date,
-    dateModified: post.date,
+    dateModified: post.updatedAt ?? post.date,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": canonical,

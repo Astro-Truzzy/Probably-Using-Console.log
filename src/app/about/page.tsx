@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AboutPhoto from "../Components/AboutPhoto";
 import ConsoleBreadcrumb from "../Components/terminal/ConsoleBreadcrumb";
+import "../styles/about.css";
 import {
   aboutBio,
   featuredProjects,
@@ -90,9 +91,9 @@ export default function About() {
         <AboutPhoto src="/profile.jpeg" alt="Trust Williams" />
 
         <div className="grid md:grid-cols-2 gap-6 min-w-0">
-          <div className="terminal md:col-span-2 lg:col-span-1">
+          <div className="terminal terminal-panel md:col-span-2 lg:col-span-1">
             <p className="text-lg leading-relaxed">{aboutBio.summary}</p>
-            <p className="mt-4 text-(--text-muted) leading-relaxed">
+            <p className="mt-4 terminal-muted leading-relaxed">
               As the founder of{" "}
               <span className="text-(--accent)">Ridely</span> and{" "}
               <span className="text-(--accent)">Ownbase</span>, I&apos;ve gone

@@ -10,7 +10,12 @@ export const metadata: Metadata = pageMetadata({
   path: "/blog",
 });
 
-export default async function BlogPage() {
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tag?: string }>;
+}) {
+  const { tag } = await searchParams;
   const posts = await getPostSummaries();
-  return <BlogListing posts={posts} />;
+  return <BlogListing posts={posts} initialTag={tag ?? null} />;
 }

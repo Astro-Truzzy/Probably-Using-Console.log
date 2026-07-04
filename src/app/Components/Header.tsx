@@ -10,7 +10,6 @@ const NAV_ITEMS = [
   { href: "/blog", label: "blog" },
   { href: "/about", label: "about" },
   { href: "/contact", label: "contact" },
-  { href: "/admin", label: "admin", hideOnMobile: true },
 ];
 
 function pathLabel(pathname: string): string {
@@ -55,9 +54,7 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`nav-tab ${active ? "nav-tab-active" : ""} ${
-                    item.hideOnMobile ? "hidden sm:inline-block" : ""
-                  }`}
+                  className={`nav-tab ${active ? "nav-tab-active" : ""}`}
                 >
                   {item.label}
                 </Link>

@@ -11,6 +11,7 @@ export interface Post {
   content: string;
   author?: string;
   date: string;
+  updatedAt?: string;
   readTime?: number;
   tags?: string[];
   likes?: number;

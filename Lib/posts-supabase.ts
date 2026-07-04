@@ -8,6 +8,7 @@ interface PostRow {
   content: string;
   author: string | null;
   date: string;
+  updated_at?: string | null;
   read_time: number | null;
   tags: string[] | null;
   likes: number | null;
@@ -23,6 +24,7 @@ function rowToPost(row: PostRow): Post {
     content: row.content,
     author: row.author ?? undefined,
     date: row.date,
+    updatedAt: row.updated_at ?? row.date,
     readTime: row.read_time ?? undefined,
     tags: row.tags ?? undefined,
     likes: row.likes ?? 0,
@@ -40,13 +42,15 @@ function slugify(title: string): string {
 
 function buildRow(payload: PostPayload): Omit<PostRow, "likes" | "comments"> {
   const slug = slugify(payload.title || "untitled");
+  const now = new Date().toISOString();
   return {
     slug,
     title: payload.title || "Untitled",
     excerpt: payload.excerpt || (payload.content || "").slice(0, 180),
     content: payload.content || "",
     author: payload.author || "Trust Williams",
-    date: new Date().toISOString(),
+    date: now,
+    updated_at: now,
     read_time: payload.readTime || 6,
     tags: payload.tags || [],
     cover: payload.cover ?? null,
@@ -103,6 +107,7 @@ export async function updatePost(
   if (payload.readTime !== undefined) updates.read_time = payload.readTime;
   if (payload.tags !== undefined) updates.tags = payload.tags;
   if (payload.cover !== undefined) updates.cover = payload.cover ?? null;
+  updates.updated_at = new Date().toISOString();
 
   const { data, error } = await supabase
     .from("posts")

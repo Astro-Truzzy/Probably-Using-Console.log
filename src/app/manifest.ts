@@ -7,6 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "console.log",
     description: siteDescription,
     start_url: "/",
+    scope: siteUrl,
     display: "standalone",
     background_color: "#020617",
     theme_color: "#020617",
@@ -21,6 +22,24 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/apple-icon",
         sizes: "180x180",
         type: "image/png",
+      },
+      {
+        src: "/icon-192",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon-512",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon-512",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };

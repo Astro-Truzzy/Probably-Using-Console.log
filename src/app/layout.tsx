@@ -6,7 +6,6 @@ import PageWrapper from "./Components/PageWrapper";
 import JsonLd from "./Components/JsonLd";
 import TerminalShell from "./Components/terminal/TerminalShell";
 import { rootMetadata, websiteJsonLd } from "@lib/seo";
-import { getPostSummaries } from "@lib/posts";
 import { firaCode, inter } from "./fonts";
 
 export const metadata: Metadata = rootMetadata();
@@ -25,18 +24,22 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const posts = await getPostSummaries();
-
   return (
     <html lang="en" className={`${inter.variable} ${firaCode.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-screen flex flex-col bg-(--bg-main) text-(--text-main) antialiased scroll-smooth font-sans">
+      <body className="min-h-screen flex flex-col bg-(--bg-main) text-(--text-main) antialiased font-sans">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <JsonLd data={websiteJsonLd()} />
-        <TerminalShell posts={posts}>
+        <TerminalShell>
           <Header />
-          <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-8">
+          <main
+            id="main-content"
+            className="flex-1 w-full max-w-6xl mx-auto px-6 py-8"
+          >
             <PageWrapper>{children}</PageWrapper>
           </main>
           <Footer />

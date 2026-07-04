@@ -3,23 +3,34 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PostSummary } from "@lib/types";
-import { siteDescription } from "@lib/config";
 import Terminal from "./Terminal";
 import TerminalWindow from "./TerminalWindow";
 import { useTerminal } from "./TerminalContext";
-import type { TerminalEntry } from "./Terminal";
 
-interface TerminalOverlayProps {
-  posts: PostSummary[];
-}
-
-export default function TerminalOverlay({ posts }: TerminalOverlayProps) {
+export default function TerminalOverlay() {
   const { open, closeTerminal } = useTerminal();
   const router = useRouter();
   const dialogRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const [posts, setPosts] = useState<PostSummary[]>([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const postsFetchedRef = useRef(false);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!open || postsFetchedRef.current) return;
+
+    setPostsLoading(true);
+    fetch("/api/posts")
+      .then((res) => res.json())
+      .then((data: PostSummary[]) => {
+        setPosts(Array.isArray(data) ? data : []);
+        postsFetchedRef.current = true;
+      })
+      .catch(() => setPosts([]))
+      .finally(() => setPostsLoading(false));
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -59,8 +70,8 @@ export default function TerminalOverlay({ posts }: TerminalOverlayProps) {
             showInput
             autoFocus
             onNavigate={(href) => {
+              void router.push(href);
               closeTerminal();
-              router.push(href);
             }}
             onClose={closeTerminal}
             bootSequence={[
@@ -68,7 +79,12 @@ export default function TerminalOverlay({ posts }: TerminalOverlayProps) {
                 id: "welcome",
                 lines: [
                   { kind: "output", text: "Terminal overlay ready." },
-                  { kind: "output", text: "Type 'help' for commands. Type 'exit' or press Esc to close." },
+                  {
+                    kind: "output",
+                    text: postsLoading
+                      ? "Loading posts index…"
+                      : "Type 'help' for commands. Type 'exit' or press Esc to close.",
+                  },
                 ],
               },
             ]}
@@ -77,41 +93,4 @@ export default function TerminalOverlay({ posts }: TerminalOverlayProps) {
       </div>
     </div>
   );
-}
-
-export function buildHeroBootSequence(
-  featured: PostSummary[]
-): TerminalEntry[] {
-  return [
-    {
-      id: "boot-1",
-      command: "whoami",
-      lines: [
-        { kind: "output", text: "visitor@console.log" },
-        { kind: "output", text: siteDescription },
-      ],
-    },
-    {
-      id: "boot-2",
-      command: "ls posts --featured",
-      lines: [
-        { kind: "output", text: `total ${featured.length}` },
-        ...featured.map((post) => ({
-          kind: "link" as const,
-          text: `  ${post.slug.padEnd(28)} ${post.title}`,
-          href: `/blog/${post.slug}`,
-        })),
-      ],
-    },
-    {
-      id: "boot-3",
-      lines: [
-        {
-          kind: "output",
-          text: "Type 'help' to explore. Press Ctrl+` to summon terminal anywhere.",
-          className: "terminal-muted",
-        },
-      ],
-    },
-  ];
 }

@@ -23,7 +23,7 @@ export default function BlogCard({ post }: { post: PostSummary }) {
         <div className="blog-card-cover">
           <Image
             src={post.cover}
-            alt=""
+            alt={post.title}
             width={640}
             height={360}
             className="blog-card-image"

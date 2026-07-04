@@ -122,6 +122,14 @@ export default function Terminal({
         setTheme(result.action.theme);
       }
 
+      const isHardNavigate =
+        result.action?.type === "navigate" && result.action.hard;
+
+      if (isHardNavigate && result.action?.type === "navigate") {
+        window.location.assign(result.action.href);
+        return;
+      }
+
       if (result.action?.type === "navigate" && onNavigate) {
         onNavigate(result.action.href);
       }
