@@ -75,7 +75,7 @@ export default function Header() {
         </div>
 
         <div className="site-nav-actions">
-          <nav className="nav-tabs hidden md:flex" aria-label="Main">
+          <nav className="nav-tabs" aria-label="Main">
             {NAV_ITEMS.map((item) => {
               const active = pathname.startsWith(item.href);
               return (
@@ -93,10 +93,12 @@ export default function Header() {
 
           <div className="site-nav-utilities">
             <TerminalTrigger />
-            <ThemeToggle />
+            <div className="nav-theme-bar">
+              <ThemeToggle />
+            </div>
             <button
               type="button"
-              className="nav-mobile-toggle md:hidden"
+              className="nav-mobile-toggle"
               onClick={() => setMenuOpen((open) => !open)}
               aria-expanded={menuOpen}
               aria-controls="mobile-nav"
@@ -112,7 +114,7 @@ export default function Header() {
 
       {menuOpen && (
         <div
-          className="nav-mobile-backdrop md:hidden"
+          className="nav-mobile-backdrop"
           role="presentation"
           onClick={closeMenu}
         />
@@ -120,7 +122,7 @@ export default function Header() {
 
       <nav
         id="mobile-nav"
-        className={`nav-mobile-menu md:hidden ${menuOpen ? "nav-mobile-menu--open" : ""}`}
+        className={`nav-mobile-menu ${menuOpen ? "nav-mobile-menu--open" : ""}`}
         aria-label="Main"
         aria-hidden={!menuOpen}
       >
@@ -142,6 +144,10 @@ export default function Header() {
             );
           })}
         </ul>
+        <div className="nav-mobile-theme">
+          <span className="nav-mobile-theme-label font-mono">$ theme</span>
+          <ThemeToggle />
+        </div>
       </nav>
     </header>
   );
