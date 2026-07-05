@@ -1,7 +1,8 @@
+import { isPublished, slugify, toPostSummary } from "./post-utils";
 import { cache } from "react";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { isSupabaseStorage } from "./config";
-import { toPostSummary } from "./post-utils";
+import { parseMarkdownPost } from "./parse-markdown-post";
 import * as jsonStore from "./posts-json";
 import * as supabaseStore from "./posts-supabase";
 import type { Comment, Post, PostPayload, PostSummary } from "./types";
@@ -23,10 +24,20 @@ const getCachedAllPosts = unstable_cache(loadAllPosts, ["posts-all"], {
 
 export const getAllPosts = cache(getCachedAllPosts);
 
-export const getPostSummaries = cache(async (): Promise<PostSummary[]> => {
+export const getPublishedPosts = cache(async (): Promise<Post[]> => {
   const posts = await getAllPosts();
+  return posts.filter(isPublished);
+});
+
+export const getPostSummaries = cache(async (): Promise<PostSummary[]> => {
+  const posts = await getPublishedPosts();
   return posts.map(toPostSummary);
 });
+
+export async function getAllPostSummaries(): Promise<PostSummary[]> {
+  const posts = await store.getAllPosts();
+  return posts.map(toPostSummary);
+}
 
 export const getPostBySlug = cache(async (slug: string): Promise<Post | undefined> => {
   if (isSupabaseStorage()) {
@@ -56,6 +67,51 @@ export async function createPost(payload: PostPayload): Promise<Post> {
   return post;
 }
 
+async function ensureUniqueSlug(baseSlug: string): Promise<string> {
+  const posts = await store.getAllPosts();
+  const existing = new Set(posts.map((post) => post.slug));
+
+  if (!existing.has(baseSlug)) return baseSlug;
+
+  let suffix = 2;
+  while (existing.has(`${baseSlug}-${suffix}`)) {
+    suffix += 1;
+  }
+  return `${baseSlug}-${suffix}`;
+}
+
+export async function previewMarkdownPost(
+  raw: string,
+  filename?: string
+): Promise<PostPayload & { slug: string }> {
+  const parsed = parseMarkdownPost(raw, filename);
+  const baseSlug = parsed.slug || slugify(parsed.title || "untitled");
+  const slug = await ensureUniqueSlug(baseSlug);
+  return { ...parsed, slug };
+}
+
+export async function createPostFromMarkdown(
+  raw: string,
+  filename?: string,
+  published = false
+): Promise<Post> {
+  const preview = await previewMarkdownPost(raw, filename);
+  return createPost({ ...preview, published });
+}
+
+export async function createPostsFromPayloads(
+  items: PostPayload[],
+  published: boolean
+): Promise<Post[]> {
+  const created: Post[] = [];
+  for (const item of items) {
+    const baseSlug = item.slug || slugify(item.title || "untitled");
+    const slug = item.slug ? baseSlug : await ensureUniqueSlug(baseSlug);
+    created.push(await createPost({ ...item, slug, published }));
+  }
+  return created;
+}
+
 export async function updatePost(
   slug: string,
   payload: PostPayload
@@ -63,6 +119,10 @@ export async function updatePost(
   const updated = await store.updatePost(slug, payload);
   if (updated) invalidatePosts(slug);
   return updated;
+}
+
+export async function publishPost(slug: string): Promise<Post | null> {
+  return updatePost(slug, { published: true });
 }
 
 export async function deletePost(slug: string): Promise<boolean> {

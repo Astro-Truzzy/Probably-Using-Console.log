@@ -1,3 +1,4 @@
+import { slugify } from "./post-utils";
 import { getSupabaseAdmin } from "./supabase";
 import type { Comment, Post, PostPayload } from "./types";
 
@@ -14,6 +15,7 @@ interface PostRow {
   likes: number | null;
   comments: Comment[] | null;
   cover: string | null;
+  published?: boolean | null;
 }
 
 function rowToPost(row: PostRow): Post {
@@ -30,18 +32,12 @@ function rowToPost(row: PostRow): Post {
     likes: row.likes ?? 0,
     comments: row.comments ?? [],
     cover: row.cover ?? undefined,
+    published: row.published ?? true,
   };
 }
 
-function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 function buildRow(payload: PostPayload): Omit<PostRow, "likes" | "comments"> {
-  const slug = slugify(payload.title || "untitled");
+  const slug = payload.slug || slugify(payload.title || "untitled");
   const now = new Date().toISOString();
   return {
     slug,
@@ -54,6 +50,7 @@ function buildRow(payload: PostPayload): Omit<PostRow, "likes" | "comments"> {
     read_time: payload.readTime || 6,
     tags: payload.tags || [],
     cover: payload.cover ?? null,
+    published: payload.published ?? false,
   };
 }
 
@@ -107,6 +104,7 @@ export async function updatePost(
   if (payload.readTime !== undefined) updates.read_time = payload.readTime;
   if (payload.tags !== undefined) updates.tags = payload.tags;
   if (payload.cover !== undefined) updates.cover = payload.cover ?? null;
+  if (payload.published !== undefined) updates.published = payload.published;
   updates.updated_at = new Date().toISOString();
 
   const { data, error } = await supabase

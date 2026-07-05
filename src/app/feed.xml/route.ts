@@ -1,4 +1,4 @@
-import { getAllPosts } from "@lib/posts";
+import { getPublishedPosts } from "@lib/posts";
 import { authorName, siteDescription, siteName, siteUrl } from "@lib/config";
 
 function escapeXml(value: string): string {
@@ -11,7 +11,7 @@ function escapeXml(value: string): string {
 }
 
 export async function GET() {
-  const posts = await getAllPosts();
+  const posts = await getPublishedPosts();
 
   const items = posts
     .map((post) => {

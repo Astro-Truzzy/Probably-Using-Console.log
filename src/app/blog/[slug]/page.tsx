@@ -1,8 +1,11 @@
-import { getPostBySlug, getAllPosts } from "../../../../Lib/posts";
+import { getPostBySlug, getPublishedPosts } from "../../../../Lib/posts";
+import { canAccessAdminFromCookies } from "@lib/auth-crypto";
+import { isPublished } from "@lib/post-utils";
 import { Metadata } from "next";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import "highlight.js/styles/github-dark.min.css";
 import BlogMarkdown from "../../Components/BlogMarkdown";
@@ -17,7 +20,7 @@ const ShareButtons = dynamic(() => import("../../Components/ShareButtons"));
 const Comments = dynamic(() => import("../../Components/Comments"));
 const NewsletterForm = dynamic(() => import("../../Components/NewsletterForm"));
 export async function generateStaticParams() {
-  const posts = await getAllPosts();
+  const posts = await getPublishedPosts();
   return posts.map((p: { slug: string }) => ({ slug: p.slug }));
 }
 
@@ -25,7 +28,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return { title: "Post not found", robots: { index: false, follow: false } };
-  return articleMetadata(post);
+  const metadata = articleMetadata(post);
+  if (!isPublished(post)) {
+    return { ...metadata, robots: { index: false, follow: false } };
+  }
+  return metadata;
 }
 
 export default async function PostPage({ params }: { params: { slug: string } }) {
@@ -33,8 +40,17 @@ export default async function PostPage({ params }: { params: { slug: string } })
   const post = await getPostBySlug(slug);
   if (!post) notFound();
 
+  const isAdmin = await canAccessAdminFromCookies(await cookies());
+  const draft = !isPublished(post);
+  if (draft && !isAdmin) notFound();
+
   return (
     <article>
+      {draft && (
+        <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 font-mono text-sm text-amber-200">
+          Draft preview — only visible to admins. Publish from the admin dashboard to make this live.
+        </div>
+      )}
       <JsonLd data={articleJsonLd(post)} />
       <ConsoleBreadcrumb segments={["blog", post.slug]} />
       <h1 className="text-3xl font-mono">{post.title}</h1>

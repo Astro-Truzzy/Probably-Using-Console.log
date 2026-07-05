@@ -38,6 +38,7 @@ async function seed() {
       likes: post.likes ?? 0,
       comments: post.comments ?? [],
       cover: post.cover ?? null,
+      published: post.published ?? true,
     };
 
     const { error } = await supabase.from("posts").upsert(row, { onConflict: "slug" });

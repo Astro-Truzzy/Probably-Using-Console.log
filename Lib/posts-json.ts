@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { slugify } from "./post-utils";
 import type { Comment, Post, PostPayload } from "./types";
 
 const DATA = path.join(process.cwd(), "Lib", "posts.json");
@@ -19,15 +20,8 @@ function writePosts(posts: Post[]): void {
   fs.writeFileSync(DATA, JSON.stringify(sortPosts(posts), null, 2));
 }
 
-function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 function buildPost(payload: PostPayload): Post {
-  const slug = slugify(payload.title || "untitled");
+  const slug = payload.slug || slugify(payload.title || "untitled");
   const now = new Date().toISOString();
   return {
     ...payload,
@@ -42,6 +36,7 @@ function buildPost(payload: PostPayload): Post {
     tags: payload.tags || [],
     comments: [],
     likes: 0,
+    published: payload.published ?? false,
   };
 }
 

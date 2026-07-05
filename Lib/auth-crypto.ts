@@ -158,7 +158,7 @@ export async function canAccessAdmin(req: NextRequest): Promise<boolean> {
 }
 
 export async function requireAdmin(req: NextRequest): Promise<boolean> {
-  return hasValidAdminSession(req);
+  return canAccessAdmin(req);
 }
 
 export function isAuthConfigured(): boolean {

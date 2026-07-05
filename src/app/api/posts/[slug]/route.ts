@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPostBySlug, updatePost, deletePost } from '../../../../../Lib/posts'
 import { requireAdmin } from '../../../../../Lib/auth'
+import { isPublished } from '../../../../../Lib/post-utils'
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params
   const post = await getPostBySlug(slug)
   if (!post) return NextResponse.json({ error: 'not found' }, { status: 404 })
+  if (!isPublished(post) && !(await requireAdmin(req))) {
+    return NextResponse.json({ error: 'not found' }, { status: 404 })
+  }
   return NextResponse.json(post)
 }
 

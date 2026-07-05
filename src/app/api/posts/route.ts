@@ -1,8 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPostSummaries, createPost } from "../../../../Lib/posts";
+import {
+  createPost,
+  getAllPostSummaries,
+  getPostSummaries,
+} from "../../../../Lib/posts";
 import { requireAdmin } from "../../../../Lib/auth";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const includeDrafts = req.nextUrl.searchParams.get("all") === "1";
+
+  if (includeDrafts) {
+    if (!(await requireAdmin(req))) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+    const posts = await getAllPostSummaries();
+    return NextResponse.json(posts);
+  }
+
   const posts = await getPostSummaries();
   return NextResponse.json(posts);
 }

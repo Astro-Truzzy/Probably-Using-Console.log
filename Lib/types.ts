@@ -18,6 +18,7 @@ export interface Post {
   comments?: Comment[];
   cover?: string;
   description?: string;
+  published?: boolean;
 }
 
 export interface PostSummary {
@@ -29,11 +30,20 @@ export interface PostSummary {
   readTime?: number;
   tags?: string[];
   cover?: string;
+  published?: boolean;
 }
 
 export type PostPayload = Partial<
   Pick<
     Post,
-    "title" | "excerpt" | "content" | "author" | "readTime" | "tags" | "cover"
+    | "slug"
+    | "title"
+    | "excerpt"
+    | "content"
+    | "author"
+    | "readTime"
+    | "tags"
+    | "cover"
+    | "published"
   >
 >;
